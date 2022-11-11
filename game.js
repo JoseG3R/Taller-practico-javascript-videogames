@@ -5,10 +5,18 @@ const btnUp = document.getElementById('up');
 const btnDown = document.getElementById('down');
 const btnLeft = document.getElementById('left');
 const btnRight = document.getElementById('right');
+const spanLives = document.getElementById('lives');
+const spanTime = document.getElementById('time');
 
 let canvasSize;
 let elementsSize;
 let level = 0;
+let lives = 3;
+
+let timeStart;
+let timePlayer;
+let timeInterval;
+
 
 const playerPosition ={
   x:undefined,
@@ -52,8 +60,16 @@ function startGame() {
     return;
   }
 
+  if (!timeStart) {
+    timeStart = Date.now();
+    timeInterval = setInterval(showTime, 100);
+  }
+
   const mapRows = map.trim().split('\n') ;
   const mapRowCols = mapRows.map(row =>row.trim().split(''));
+
+  showLives()
+
 
   enemyPositions = [];
   game.clearRect(0,0,canvasSize,canvasSize);
@@ -112,7 +128,7 @@ function movePlayer() {
   })
   
   if(enemyCollision){
-    console.log('Chocaste con un enemigo :(');
+    levelFail();
   }
   game.fillText(emojis['PLAYER'], playerPosition.x, playerPosition.y);
 
@@ -122,8 +138,38 @@ function levelWin(){
   level++;
   startGame();
 }
+function levelFail() {
+  console.log('chocaste con un enemigo');
+
+  lives--;
+
+  console.log(lives);
+  if (lives <= 0) {
+    level = 0;
+    lives = 3;
+    timeStart = undefined;
+  }
+
+  playerPosition.x = undefined;
+  playerPosition.y = undefined;
+  startGame();
+}
 function gameWin() {
   console.log('Terminaste el juego');
+  clearInterval(timeInterval);
+}
+function showLives() {
+  const heartsArray = Array(lives).fill(emojis['HEART']); //[,,,]
+  //console.log(heartsArray);
+  
+  spanLives.innerHTML = '';
+  heartsArray.forEach(heart=>{
+    //console.log(heart);
+    spanLives.append(heart);
+  })
+}
+function showTime() {
+  spanTime.innerHTML = Date.now() - timeStart;
 }
 
 window.addEventListener('keydown',moveByKeys)
@@ -141,7 +187,7 @@ function moveByKeys(e) {
 
 function moveUp() {
   console.log('arriba');
-  if ((playerPosition.y - elementsSize) < elementsSize) {
+  if ((playerPosition.y - elementsSize) < 0) {
     console.log('Out');
   }else{
 
