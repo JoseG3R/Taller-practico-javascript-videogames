@@ -7,6 +7,9 @@ const btnLeft = document.getElementById('left');
 const btnRight = document.getElementById('right');
 const spanLives = document.getElementById('lives');
 const spanTime = document.getElementById('time');
+const spanRecord = document.getElementById('record');
+const pResult = document.getElementById('result');
+
 
 let canvasSize;
 let elementsSize;
@@ -36,16 +39,20 @@ window.addEventListener('resize', setCanvasSize);
 function setCanvasSize() {
 
   if (window.innerHeight > window.innerWidth) {
-    canvasSize = window.innerWidth * 0.8;
+    canvasSize = window.innerWidth * 0.7;
   } else {
-    canvasSize = window.innerHeight * 0.8;
+    canvasSize = window.innerHeight * 0.7;
   }
   
+  canvasSize = Number(canvasSize.toFixed(0));
+
   canvas.setAttribute('width', canvasSize);
   canvas.setAttribute('height', canvasSize);
   
   elementsSize = canvasSize / 10;
-
+  
+  playerPosition.x = undefined;
+  playerPosition.y = undefined;
   startGame()
 }
 
@@ -63,6 +70,7 @@ function startGame() {
   if (!timeStart) {
     timeStart = Date.now();
     timeInterval = setInterval(showTime, 100);
+    showRecord();
   }
 
   const mapRows = map.trim().split('\n') ;
@@ -157,6 +165,26 @@ function levelFail() {
 function gameWin() {
   console.log('Terminaste el juego');
   clearInterval(timeInterval);
+
+  const recordTime = localStorage.getItem('record_time');
+  const playerTime = Date.now() - timeStart;
+  if (recordTime) {
+    if (recordTime >= playerTime) {
+      localStorage.setItem('record_time', playerTime);
+      pResult.innerHTML = 'superaste el record :)';
+    }else{
+      pResult.innerHTML = 'lo siento no superaste el record :(';
+    }
+  }else{
+    localStorage.setItem('record_time', playerTime);
+    pResult.innerHTML = 'primera vez! muy bien! ahora trata de superar el record!';
+
+  }
+
+  console.log({recordTime, playerTime});
+
+
+
 }
 function showLives() {
   const heartsArray = Array(lives).fill(emojis['HEART']); //[,,,]
@@ -170,6 +198,9 @@ function showLives() {
 }
 function showTime() {
   spanTime.innerHTML = Date.now() - timeStart;
+}
+function showRecord() {
+  spanRecord.innerHTML = localStorage.getItem('record_time');
 }
 
 window.addEventListener('keydown',moveByKeys)
